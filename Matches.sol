@@ -10,6 +10,17 @@ contract Matches{
     }
     aMatch[] allMatches;
     
+    struct aBet{
+        string team1;
+        string team2;
+        uint phase;
+        uint team1Score;
+        uint team2Score;
+        uint betAmount;
+        address accntName;
+    }
+    aBet[] allBets;
+    
     function chkMatch(string teamHome, string teamAway, uint phase) public returns (bool){
         uint i;
         for(i=0;i<allMatches.length;i++){
@@ -42,6 +53,7 @@ contract Matches{
     }
     
     function updateMatch(string teamHome, string teamAway, uint phase, uint matchStartDateTime, uint minimumBet) public{
+        //Only startdatetime & minimum bet can be updated
         uint i;
         for(i=0;i<allMatches.length;i++){
             if(compareStrings(allMatches[i].team1,teamHome) && compareStrings(allMatches[i].team2,teamAway) && allMatches[i].phase==phase){
@@ -51,6 +63,38 @@ contract Matches{
         }
     }
     
+    function setBet(string team1, string team2, uint phase, uint team1Score, uint team2Score, uint betAmount, address accntName) public returns (bool){
+        //Create
+        uint j;
+        for(j=0;j<allBets.length;j++){
+            if(!(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName)){
+                allBets.push(aBet(team1,team2,phase,team1Score,team2Score,betAmount,accntName));
+                return true;
+            }    
+        }
+        //Update
+        uint i;
+        for(i=0;i<allBets.length;i++){
+            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName){
+                allBets[i].team1Score=team1Score;
+                allBets[i].team2Score=team2Score;
+                allBets[i].betAmount=betAmount;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    function deleteBet(string team1, string team2, uint phase, address accntName) public returns (bool){
+        uint i;
+        for(i=0;i<allBets.length;i++){
+            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName){
+                delete allBets[i];
+                return true;
+            }
+        }
+        return false;
+    }
     
     //General functions
     function compareStrings (string a, string b) public returns (bool){
