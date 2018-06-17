@@ -17,9 +17,16 @@ contract Matches{
         uint team1Score;
         uint team2Score;
         uint betAmount;
-        address accntName;
+        string accntName;
+        string win;
     }
     aBet[] allBets;
+    
+    struct anAccount{
+        string accntName;
+        int purse;
+    }
+    anAccount[] allAccounts;
     
     function chkMatch(string teamHome, string teamAway, uint phase) public returns (bool){
         uint i;
@@ -63,32 +70,44 @@ contract Matches{
         }
     }
     
-    function setBet(string team1, string team2, uint phase, uint team1Score, uint team2Score, uint betAmount, address accntName) public returns (bool){
-        //Create
+    function setBet(string team1, string team2, uint phase, uint team1Score, uint team2Score, uint betAmount, string accntName) public returns (bool){
+        
         uint j;
+        string memory winTeam;
+        if(team1Score>team2Score){
+            winTeam=team1;
+        }
+        if(team1Score<team2Score){
+            winTeam=team2;
+        }
+        if(team1Score==team2Score){
+            winTeam="draw";
+        }
+        //Create
         for(j=0;j<allBets.length;j++){
-            if(!(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName)){
-                allBets.push(aBet(team1,team2,phase,team1Score,team2Score,betAmount,accntName));
+            if(!(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && compareStrings(allBets[i].accntName,accntName))){
+                allBets.push(aBet(team1,team2,phase,team1Score,team2Score,betAmount,accntName,winTeam));
                 return true;
             }    
         }
         //Update
         uint i;
         for(i=0;i<allBets.length;i++){
-            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName){
+            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && compareStrings(allBets[i].accntName,accntName)){
                 allBets[i].team1Score=team1Score;
                 allBets[i].team2Score=team2Score;
                 allBets[i].betAmount=betAmount;
+                allBets[i].win=winTeam;
                 return true;
             }
         }
         return false;
     }
     
-    function deleteBet(string team1, string team2, uint phase, address accntName) public returns (bool){
+    function deleteBet(string team1, string team2, uint phase, string accntName) public returns (bool){
         uint i;
         for(i=0;i<allBets.length;i++){
-            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && allBets[i].accntName==accntName){
+            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && compareStrings(allBets[i].accntName,accntName)){
                 delete allBets[i];
                 return true;
             }
@@ -96,6 +115,70 @@ contract Matches{
         return false;
     }
     
+    function getBetFor(string team1, string team2, uint phase, string accntName) public returns (uint){
+        uint i;
+        for(i=0;i<allBets.length;i++){
+            if(compareStrings(allBets[i].team1,team1) && compareStrings(allBets[i].team2,team2) && allBets[i].phase==phase && compareStrings(allBets[i].accntName,accntName)){
+                return allBets[i].betAmount;
+            }
+        }
+        return 0;
+    }
+    
+    //Collation of all bets per account
+    function accountMaster(string accntName, int amt){
+        uint i;
+        bool flag=false;
+        for(i=0;i<=allAccounts.length;i++){
+            if(compareStrings(allAccounts[i].accntName,accntName)){
+                flag=true;
+            }
+        }
+        if(flag==false){
+            allAccounts.push(anAccount(accntName,0));
+        }
+        
+        for(i=0;i<=allAccounts.length;i++){
+            if(compareStrings(allAccounts[i].accntName,accntName)){
+                allAccounts[i].purse=allAccounts[i].purse+amt;
+            }
+        }
+    }
+    
+    function getPurseFor(string accntName) public returns (int){
+        uint i;
+        for(i=0;i<=allAccounts.length;i++){
+            if(compareStrings(allAccounts[i].accntName,accntName)){
+                return allAccounts[i].purse;
+                break;
+            }
+        }
+    }
+    
+    function payout(string team1, string team2, uint phase, uint team1Score, uint team2Score) returns (bool){
+        uint i;
+        string memory winTeam;
+        if(team1Score>team2Score){
+            winTeam=team1;
+        }
+        if(team1Score<team2Score){
+            winTeam=team2;
+        }
+        if(team1Score==team2Score){
+            winTeam="draw";
+        }
+        
+        if(!chkMatch(team1,team2,phase)){
+            return false;
+        }
+        
+        //perfect score
+        for(i=0;i<=allBets.length;i++){
+            
+        }
+        
+    }
+        
     //General functions
     function compareStrings (string a, string b) public returns (bool){
        return keccak256(a) == keccak256(b);
